@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIKO To Do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eceef1; --bg2:#f4f5f7; --card:#ffffff;
+    --ink:#2b3038; --muted:#888e99; --line:#e3e6ea; --line2:#d3d7df;
+    --accent:#4b5563; --accent-dim:#eceef2;
+    --honbgyo:#64748b; --fukugyo:#7c8a99; --kojin:#9aa0ab;
+    --red:#a06a6a; --orange:#9a8763; --green:#6b8a78;
+    --font:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    --display:"Noto Sans JP",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:var(--font);
+    background:var(--bg);color:var(--ink);line-height:1.55;letter-spacing:.2px}
+  header{background:rgba(248,249,251,.88);backdrop-filter:blur(12px);
+    color:var(--ink);padding:20px 16px 0;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line2)}
+  .title{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:900;letter-spacing:.8px}
+  .title .dot{width:8px;height:8px;border-radius:50%;background:var(--ink)}
+  .title .en{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:4px;color:var(--muted)}
+  .subtitle{font-size:11.5px;color:var(--muted);margin-top:4px;letter-spacing:.3px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px}
+  .tabs{display:flex;gap:4px;max-width:760px;margin:14px auto 0;overflow-x:auto}
+  .tab{flex:1;min-width:72px;text-align:center;padding:11px 6px;border-radius:10px 10px 0 0;background:transparent;
+    color:var(--muted);font-weight:700;font-size:13.5px;cursor:pointer;border:none;white-space:nowrap;
+    border-bottom:2px solid transparent;letter-spacing:.5px;transition:.18s}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+  .tab .cnt{display:inline-block;min-width:18px;font-size:10.5px;background:var(--bg2);border-radius:9px;padding:0 6px;margin-left:5px;color:var(--muted)}
+  .tab.active .cnt{background:var(--accent-dim);color:var(--ink)}
+
+  main{max-width:760px;margin:0 auto;padding:16px 14px 14px}
+  .addbar{background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:14px;margin-bottom:18px;box-shadow:0 2px 10px rgba(17,24,39,.04)}
+  .addbar .row{display:flex;gap:8px;flex-wrap:wrap}
+  .addbar input[type=text]{flex:1 1 100%;min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:11px;
+    font-size:16px;background:var(--bg2);color:var(--ink)}
+  .addbar input[type=text]::placeholder{color:var(--muted)}
+  .addbar input[type=text]:focus{outline:none;border-color:var(--line2);background:#fff;box-shadow:0 0 0 3px rgba(75,85,99,.08)}
+  select,input[type=date]{padding:11px;border:1px solid var(--line);border-radius:11px;font-size:14px;
+    background:var(--bg2);color:var(--ink);flex:1 1 30%;min-width:0}
+  select:focus,input[type=date]:focus{outline:none;border-color:var(--line2)}
+  .addbtn{flex:1 1 100%;margin-top:10px;padding:13px;border:none;border-radius:11px;
+    background:var(--ink);color:#fff;font-size:16px;font-weight:700;
+    cursor:pointer;letter-spacing:.5px}
+  .addbtn:active{transform:scale(.99)}
+
+  .hint{font-size:11.5px;color:var(--muted);margin:0 2px 12px;display:flex;align-items:center;gap:6px;letter-spacing:.2px}
+
+  ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+  li.task{background:var(--card);border:1px solid var(--line);
+    border-left:3px solid var(--line2);border-radius:13px;padding:13px 14px;display:flex;align-items:flex-start;gap:12px;
+    transition:.18s;box-shadow:0 1px 3px rgba(17,24,39,.03)}
+  li.task:hover{border-color:var(--line2)}
+  li.task.cat-本業{border-left-color:var(--honbgyo)}
+  li.task.cat-副業{border-left-color:var(--fukugyo)}
+  li.task.cat-個人{border-left-color:var(--kojin)}
+  li.task.done{opacity:.45}
+  .check{flex:0 0 auto;width:24px;height:24px;border:2px solid var(--line2);border-radius:7px;cursor:pointer;margin-top:1px;
+    display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;background:transparent;transition:.15s}
+  .check:hover{border-color:var(--muted)}
+  .done .check{background:var(--green);border-color:var(--green)}
+  .body{flex:1;min-width:0}
+  .tname{font-size:15px;font-weight:600;word-break:break-word;letter-spacing:.2px}
+  .done .tname{text-decoration:line-through;color:var(--muted)}
+  .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;align-items:center}
+  .chip{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:7px;background:var(--bg2);color:var(--muted);
+    letter-spacing:.4px;border:1px solid var(--line)}
+  .chip.cat{border:none;background:var(--accent-dim);color:#5b616c}
+  .chip.cat.本業,.chip.cat.副業,.chip.cat.個人{background:var(--accent-dim);color:#5b616c}
+  .chip.imp-高{background:#f3ecec;color:var(--red);border-color:#ead9d9}
+  .chip.imp-中{background:#f2efe7;color:var(--orange);border-color:#e6ddc9}
+  .chip.imp-低{background:#e9eef3;color:#6b7c8c;border-color:#d6dee6}
+  .due{font-size:11.5px;font-weight:700;letter-spacing:.3px}
+  .due.over{color:var(--red)} .due.today{color:var(--orange)} .due.soon{color:var(--ink)} .due.far{color:var(--muted)}
+  .del{flex:0 0 auto;background:none;border:none;color:#c7cbd3;font-size:20px;cursor:pointer;padding:0 2px;line-height:1;transition:.15s}
+  .del:hover{color:var(--red)}
+  .order{flex:0 0 auto;width:23px;height:23px;background:var(--ink);color:#fff;border-radius:7px;
+    font-family:var(--display);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .done .order{background:var(--line2);color:#fff}
+  .empty{text-align:center;color:var(--muted);padding:48px 10px;font-size:14px;letter-spacing:.3px}
+  .sectionlabel{font-size:11px;font-weight:700;color:var(--muted);margin:18px 2px 6px;display:flex;align-items:center;gap:6px;
+    letter-spacing:1px;text-transform:uppercase}
+  .footer{text-align:center;color:#c7cbd3;font-size:10.5px;padding:22px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="title">AIKO To Do</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+
+<main>
+  <div class="addbar">
+    <div class="row">
+      <input type="text" id="t-name" placeholder="やることを入力（例：オーナーへ修理報告）">
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="t-cat">
+        <option value="本業">本業</option>
+        <option value="副業">副業</option>
+        <option value="個人">個人</option>
+      </select>
+      <input type="date" id="t-due">
+      <select id="t-imp">
+        <option value="高">重要度：高</option>
+        <option value="中" selected>重要度：中</option>
+        <option value="低">重要度：低</option>
+      </select>
+    </div>
+    <button class="addbtn" id="addbtn">＋ 追加する</button>
+  </div>
+
+  <div class="hint">⬆️ 期限が近い順 → 同じ期限なら重要度が高い順に、自動で並びます。番号順に上から進めればOK。</div>
+
+  <div id="listarea"></div>
+  <div class="footer" id="footer">クラウド同期：接続中…</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  // ====== Supabase 設定 ======
+  const SUPABASE_URL = "https://bxzaggvtbsrziuregcmd.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_Vm231JWwYokf0Aws2Q45_g_fk2q-pqS";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const CATS = ["本業","副業","個人"];
+  const IMP_RANK = {"高":0,"中":1,"低":2};
+  let state = { active:"すべて", tasks:[] };
+
+  function setStatus(msg){ const f=document.getElementById("footer"); if(f) f.textContent=msg; }
+
+  // ---------- DBの行 → アプリ内の形 ----------
+  function fromRow(r){ return {id:r.id, name:r.name, cat:r.category, due:r.due||"", imp:r.importance, done:!!r.done}; }
+
+  // ---------- 読み込み（クラウドから） ----------
+  async function fetchTasks(){
+    const { data, error } = await sb.from("tasks").select("*");
+    if(error){ setStatus("読み込みエラー: "+error.message); return; }
+    state.tasks = (data||[]).map(fromRow);
+    setStatus("クラウド同期中 — どの端末でも同じ内容が見られます");
+    render();
+  }
+
+  // ---------- 期限の表示 ----------
+  function dueInfo(due){
+    if(!due) return {label:"期限なし", cls:"far", days:9999};
+    const t = new Date(); t.setHours(0,0,0,0);
+    const dd = new Date(due+"T00:00:00");
+    const days = Math.round((dd - t)/86400000);
+    let label, cls;
+    if(days<0){ label="期限切れ "+(-days)+"日"; cls="over"; }
+    else if(days===0){ label="今日まで"; cls="today"; }
+    else if(days===1){ label="明日まで"; cls="soon"; }
+    else if(days<=3){ label="あと"+days+"日"; cls="soon"; }
+    else { label=(dd.getMonth()+1)+"/"+dd.getDate()+" まで"; cls="far"; }
+    return {label, cls, days};
+  }
+
+  // ---------- 並べ替え：未完了→期限近い順→重要度高い順 ----------
+  function sortTasks(arr){
+    return arr.slice().sort((a,b)=>{
+      if(a.done!==b.done) return a.done?1:-1;
+      const da = a.due ? new Date(a.due).getTime() : Infinity;
+      const db = b.due ? new Date(b.due).getTime() : Infinity;
+      if(da!==db) return da-db;
+      return IMP_RANK[a.imp]-IMP_RANK[b.imp];
+    });
+  }
+
+  // ---------- 描画 ----------
+  function counts(){
+    const c = {"すべて":0,"本業":0,"副業":0,"個人":0};
+    state.tasks.forEach(t=>{ if(!t.done){ c["すべて"]++; c[t.cat]++; } });
+    return c;
+  }
+  function renderTabs(){
+    const c = counts();
+    const tabs = ["すべて",...CATS];
+    document.getElementById("tabs").innerHTML = tabs.map(name=>
+      `<button class="tab ${state.active===name?'active':''}" data-tab="${name}">${name}<span class="cnt">${c[name]}</span></button>`
+    ).join("");
+  }
+  function renderList(){
+    const area = document.getElementById("listarea");
+    let items = state.tasks.filter(t=> state.active==="すべて" ? true : t.cat===state.active );
+    items = sortTasks(items);
+    const open = items.filter(t=>!t.done);
+    const done = items.filter(t=>t.done);
+
+    if(items.length===0){ area.innerHTML = `<div class="empty">タスクはまだありません。<br>上の欄から追加してみましょう 🏄</div>`; return; }
+
+    let html = "";
+    html += `<ul class="list">`;
+    open.forEach((t,i)=> html += taskHTML(t, i+1));
+    html += `</ul>`;
+    if(done.length){
+      html += `<div class="sectionlabel">✅ 完了（${done.length}）</div><ul class="list">`;
+      done.forEach(t=> html += taskHTML(t, "✓"));
+      html += `</ul>`;
+    }
+    area.innerHTML = html;
+  }
+  function taskHTML(t, num){
+    const di = dueInfo(t.due);
+    const catChip = state.active==="すべて" ? `<span class="chip cat ${t.cat}">${t.cat}</span>` : "";
+    return `<li class="task cat-${t.cat} ${t.done?'done':''}" data-id="${t.id}">
+      <div class="order">${num}</div>
+      <div class="check" data-act="toggle">${t.done?'✓':''}</div>
+      <div class="body">
+        <div class="tname">${esc(t.name)}</div>
+        <div class="meta">
+          ${catChip}
+          <span class="chip imp-${t.imp}">重要度 ${t.imp}</span>
+          <span class="due ${di.cls}">🗓 ${di.label}</span>
+        </div>
+      </div>
+      <button class="del" data-act="del" title="削除">×</button>
+    </li>`;
+  }
+  function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+  function render(){ renderTabs(); renderList(); }
+
+  // ---------- 操作（クラウドに保存） ----------
+  async function add(){
+    const nameEl = document.getElementById("t-name");
+    const name = nameEl.value.trim();
+    if(!name){ nameEl.focus(); return; }
+    const row = {
+      name,
+      category: document.getElementById("t-cat").value,
+      due: document.getElementById("t-due").value || null,
+      importance: document.getElementById("t-imp").value,
+      done: false
+    };
+    nameEl.value=""; document.getElementById("t-due").value="";
+    setStatus("保存中…");
+    const { data, error } = await sb.from("tasks").insert(row).select();
+    if(error){ setStatus("追加エラー: "+error.message); return; }
+    if(data && data[0]) state.tasks.push(fromRow(data[0]));
+    setStatus("クラウド同期中 — どの端末でも同じ内容が見られます");
+    render();
+  }
+
+  async function toggleTask(task){
+    const newDone = !task.done;
+    task.done = newDone; render();
+    const { error } = await sb.from("tasks").update({ done:newDone }).eq("id", task.id);
+    if(error){ task.done=!newDone; render(); setStatus("更新エラー: "+error.message); }
+  }
+
+  async function delTask(tid){
+    const prev = state.tasks;
+    state.tasks = state.tasks.filter(t=>t.id!==tid); render();
+    const { error } = await sb.from("tasks").delete().eq("id", tid);
+    if(error){ state.tasks=prev; render(); setStatus("削除エラー: "+error.message); }
+  }
+
+  // ---------- イベント ----------
+  document.getElementById("addbtn").addEventListener("click", add);
+  document.getElementById("t-name").addEventListener("keydown", e=>{ if(e.key==="Enter") add(); });
+  document.getElementById("tabs").addEventListener("click", e=>{
+    const b = e.target.closest("[data-tab]"); if(!b) return;
+    state.active = b.dataset.tab; render();
+  });
+  document.getElementById("listarea").addEventListener("click", e=>{
+    const li = e.target.closest("li.task"); if(!li) return;
+    const tid = li.dataset.id;
+    const act = e.target.closest("[data-act]")?.dataset.act;
+    const task = state.tasks.find(t=>t.id===tid); if(!task) return;
+    if(act==="toggle"){ toggleTask(task); }
+    else if(act==="del"){ delTask(tid); }
+  });
+
+  // ---------- 起動 ----------
+  render();
+  fetchTasks();
+})();
+</script>
+</body>
+</html>
